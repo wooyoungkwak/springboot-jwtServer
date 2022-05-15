@@ -99,7 +99,7 @@ task initWebProject (dependsOn: ['createYML', 'createLog4j'], description: "init
             String packageDir = this.group.toString().replace('.', '\\')
             String javaDir = rootDir + '\\' + packageDir + '\\' + this.name
 
-            [new File(javaDir, '/controller') , new File(javaDir, '/exception'), new File(javaDir, '/aop'),
+            [new File(javaDir, '/controller') , new File(javaDir, '/exception'), new File(javaDir, '/aop'), new File(javaDir, '/interceptor'),
              new File(javaDir, '/model'),new File(javaDir, '/security')].each {
                 if (!it.exists()) it.mkdirs()
             }
@@ -286,7 +286,12 @@ task createYML {
                     File configFile = file(it)
                     configFile.write content
                 }
+            }
 
+            [new File(absoluteDir, '../resources/application.properties' )].each {
+                if (it.exists()) {
+                    it.delete()
+                }
             }
         }
 

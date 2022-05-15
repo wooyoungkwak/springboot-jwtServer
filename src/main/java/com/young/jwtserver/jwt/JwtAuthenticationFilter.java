@@ -30,7 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.isEmpty(jwtToken)) {
 
-            request.setAttribute("unauthorization", ErrorCode.MalformedJwtException);
+//            request.setAttribute("unauthorization", ErrorCode.MalformedJwtException);
+            response.sendRedirect("/login");
 
         }  else {
 
@@ -59,12 +60,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     //6. 만료 여부
                     if ( jwtTokenProvider.isExpired() ) {
+
                         //6-1. 재설정 시간 만료 여부
                         if ( jwtTokenProvider.isRefresh() ) {
                             response.sendRedirect("/login");
                         } else {
                             response.sendRedirect("/auth");
                         }
+
                     }
 
                 } else {
@@ -94,4 +97,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
 }
