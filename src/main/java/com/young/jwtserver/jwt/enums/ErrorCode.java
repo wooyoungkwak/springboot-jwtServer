@@ -11,7 +11,8 @@ import org.springframework.http.HttpStatus;
  */
 public enum ErrorCode {
 
-    NONE(200, "", HttpStatus.ACCEPTED),
+    NONE(200, "success", HttpStatus.ACCEPTED),
+    NOTNULL(200, "토큰이 존재하지 않습니다.", HttpStatus.ACCEPTED),
     UsernameOrPasswordNotFoundException(400, "아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     UNAUTHORIZEDException(401, "로그인 후 이용가능합니다.", HttpStatus.UNAUTHORIZED),
     ForbiddenException(403, "해당 요청에 대한 권한이 없습니다.", HttpStatus.FORBIDDEN),

@@ -22,7 +22,7 @@
 
                             <form method="post" id="FormLogin" action="/loginProcess">
                                 <div class="form-floating mb-3">
-                                    <input class="form-control" name="username" id="inputEmail" type="email" placeholder="young"/>
+                                    <input class="form-control" name="username" id="inputEmail" type="email" placeholder=""/>
                                     <label for="inputEmail">Account</label>
                                 </div>
                                 <div class="form-floating mb-3">
@@ -30,15 +30,15 @@
                                     <label for="inputPassword">Password</label>
                                 </div>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" id="inputRememberPassword" type="checkbox"
-                                           value=""/>
-                                    <label class="form-check-label" for="inputRememberPassword">Remember
-                                        Password</label>
+                                    <input class="form-check-input" id="inputRememberPassword" type="checkbox" value=""/>
+                                    <label class="form-check-label" for="inputRememberPassword">Remember Password</label>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
                                     <a class="small" href="password">Forgot Password?</a>
                                     <a class="btn btn-primary" id="BtnLogin">Login</a>
                                 </div>
+
+                                <input type="text" id="code" name="code" style="display: none" value="${code}" />
                             </form>
 
                         </div>
@@ -60,26 +60,43 @@
                 let $form = $('#FormLogin');
                 let $btnLogin = $('#BtnLogin');
 
+                let login = function () {
+                    let url = $form.attr("action");
+
+                    let data = {
+                        username: $("#inputEmail").val(),
+                        password: $("#inputPassword").val(),
+                        code: $("#code").val()
+                    };
+
+                    url += "?" + $.param(data);
+                    url = encodeURI(url);
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        success: function (ret, statusText) {
+                            console.log(ret);
+                        },
+                        error: function (xhr, statusText, errorThrown) {
+                            console.log(xhr.status);
+                            console.log(statusText);
+                            console.log(errorThrown);
+                        }
+                    });
+                };
+
                 $btnLogin.on('click', function () {
-                    $form.submit();
+                    // $form.submit();
+                    login();
                 });
 
                 $('#inputPassword').on('keydown', function (e) {
                     if (e.key == 'Enter') { // Enter key
-                        $form.submit();
+                        // $form.submit();
+                        login();
                     }
                 });
-
-                let url = location.href;
-                let path = url.split('?');
-                if (path.length > 1) {
-                    let state = path[1].split('=')[1];
-
-                    if (state == 'fail') {
-                        alert('인증 실패 하였습니다.');
-                    }
-                    location.href = path[0];
-                }
 
             });
         </script>

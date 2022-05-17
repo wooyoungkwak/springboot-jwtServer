@@ -9,7 +9,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -28,12 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String jwtToken = getJwtFromRequest(request); //request에서 jwt 토큰을 꺼낸다.
 
-        if (StringUtils.isEmpty(jwtToken)) {
-
-//            request.setAttribute("unauthorization", ErrorCode.MalformedJwtException);
-            response.sendRedirect("/login");
-
-        }  else {
+        if (StringUtils.isNotEmpty(jwtToken)) {
 
             try {
 
@@ -58,42 +52,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     //5. 세션에서 계속 사용하기 위해 securityContext에 Authentication 등록
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    //6. 만료 여부
-                    if ( jwtTokenProvider.isExpired() ) {
-
-                        //6-1. 재설정 시간 만료 여부
-                        if ( jwtTokenProvider.isRefresh() ) {
-                            response.sendRedirect("/login");
-                        } else {
-                            response.sendRedirect("/auth");
-                        }
-
-                    }
+                    //6. jwtTokenProvider 정보
+                    request.setAttribute("authorization", errorCode);
+                    request.getRequestDispatcher("/auth").forward(request, response);
 
                 } else {
-                    request.setAttribute("unauthorization", errorCode);
+
+                    request.setAttribute("authorization", errorCode);
+                    filterChain.doFilter(request, response);
+
                 }
 
             } catch (Exception ex) {
                 logger.error("Could not set user authentication in security context", ex);
             }
 
+        } else {
+            request.setAttribute("authorization", ErrorCode.NOTNULL);
+            filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
 
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
-        String userToken = "";
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies ) {
-            if (StringUtils.equals("uToken", cookie.getName()))
-                userToken = cookie.getValue();
-        }
-
-        if (StringUtils.isNotEmpty(userToken)) {
-            return userToken;
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.isNotEmpty(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring("Bearer ".length());
         }
         return null;
     }

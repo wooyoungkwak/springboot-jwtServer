@@ -39,6 +39,9 @@ public class UserAuthenticationManager implements AuthenticationManager {
         String account = authentication.getPrincipal().toString();          // ID
         String password = authentication.getCredentials().toString();       // PASSWORD
 
+log.info(" account = {}", account);
+log.info(" password = {}", password);
+
         User user = (User) userDetailsService.loadUserByUsername(account);
 
         if( user == null || !user.isEnabled()) {

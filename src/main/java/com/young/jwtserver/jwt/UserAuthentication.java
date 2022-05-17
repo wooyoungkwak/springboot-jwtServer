@@ -12,6 +12,7 @@ import java.util.Collection;
  * Description :
  */
 public class UserAuthentication extends UsernamePasswordAuthenticationToken {
+
     public UserAuthentication(Object principal, Object credentials) {
         super(principal, credentials);
     }
@@ -19,4 +20,6 @@ public class UserAuthentication extends UsernamePasswordAuthenticationToken {
     public UserAuthentication(String principal, String credentials, Collection<? extends GrantedAuthority> authorities) {
         super(principal, credentials, authorities);
     }
+
 }
+

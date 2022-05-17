@@ -36,7 +36,31 @@ public class JwtTokenProvider {
     // jwt 토큰 생성
     public String generateToken(Authentication authentication) {
 
-        Date now = new Date();                                          // 금일
+        Date now = new Date();                                          // 현재 시간 설정
+        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);  // 만료일 설정
+
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("alg", "HS512");
+        headers.put("type", "jwt");
+
+        Map<String, Object> payloads = new HashMap<>();
+        payloads.put("id", authentication.getPrincipal().toString());
+        payloads.put("password", authentication.getCredentials().toString());
+        payloads.put("authenticated", authentication.isAuthenticated());
+        payloads.put("email", "zilet1234@gmail.com");
+
+        return Jwts.builder()
+                .setHeader(headers)                                     // header
+                .setClaims(payloads)                                    // payload
+                .setSubject("jwt_server_authentication")                // 제목 ( payload 일부 ? )
+                .setIssuedAt(now)                                       // 현재 시간 기반으로 생성 ( payload 일부 ? )
+                .setExpiration(expiryDate)                              // 만료 시간 세팅 ( payload 일부 ? )
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)         // 사용할 암호화 알고리즘, signature 에 들어갈 secret 값 세팅 ( payload 일부 ? )
+                .compact();
+    }
+
+    public String generateRefreshToken(Authentication authentication) {
+        Date now = new Date();                                                  // 현재 시간 설정
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);  // 만료일 설정
         Date refreshDate = new Date(now.getTime() + JWT_REFRESH_EXPIRATION_MS); // 만료일 재설정
 
@@ -48,8 +72,8 @@ public class JwtTokenProvider {
         payloads.put("id", authentication.getPrincipal().toString());
         payloads.put("password", authentication.getCredentials().toString());
         payloads.put("authenticated", authentication.isAuthenticated());
+        payloads.put("refreshDate", expiryDate);
         payloads.put("email", "zilet1234@gmail.com");
-        payloads.put("refreshDate", refreshDate);       // 만료 시간 재 설정
 
         return Jwts.builder()
                 .setHeader(headers)                                     // header
@@ -103,7 +127,7 @@ public class JwtTokenProvider {
         return false;
     }
 
-    public boolean isRefresh(){
+    public boolean isRefreshExpired(){
         Date now = this.claims.getIssuedAt();
         Date refreshDate = (Date) this.claims.get("refreshDate");
 
@@ -118,12 +142,12 @@ public class JwtTokenProvider {
 
     // Jwt 토큰에서 아이디 추출
     public String getUserIdFromJWT(String token) {
-        Claims innerClaims = Jwts.parser()
-                .setSigningKey(JWT_SECRET)
-                .parseClaimsJws(token)
-                .getBody();
-
-        return (String) innerClaims.get("id");
+        ErrorCode errorCode = setJwtTokenProvider(token);
+        if (ErrorCode.NONE == errorCode) {
+            return (String) this.claims.get("id");
+        } else {
+            return null;
+        }
     }
 
     // Authentication 가져오기
