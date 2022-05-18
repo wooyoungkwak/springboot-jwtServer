@@ -2,6 +2,7 @@ package com.young.jwtserver.security;
 
 import com.young.jwtserver.model.entity.login.domain.User;
 import com.young.jwtserver.model.entity.login.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,14 +25,13 @@ import java.util.Iterator;
  * Description :
  */
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class UserAuthenticationManager implements AuthenticationManager {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {

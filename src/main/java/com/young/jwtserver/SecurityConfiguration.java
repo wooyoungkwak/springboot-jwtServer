@@ -2,12 +2,13 @@ package com.young.jwtserver;
 
 import com.young.jwtserver.jwt.JwtAuthenticationEntryPoint;
 import com.young.jwtserver.jwt.JwtAuthenticationFilter;
+import com.young.jwtserver.jwt.JwtTokenProvider;
 import com.young.jwtserver.security.UserAuthFailureHandler;
 import com.young.jwtserver.security.UserAuthLogoutSuccessHandler;
 import com.young.jwtserver.security.UserAuthSuccessHandler;
 import com.young.jwtserver.security.UserAuthenticationManager;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,23 +24,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * Description :
  */
 @Slf4j
+@RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    UserAuthSuccessHandler userAuthSuccessHandler;
-
-    @Autowired
-    UserAuthFailureHandler userAuthFailureHandler;
-
-    @Autowired
-    UserAuthLogoutSuccessHandler userAuthLogoutSuccessHandler;
-
-    @Autowired
-    UserAuthenticationManager authenticationManager;
-
-    @Autowired
-    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final UserAuthSuccessHandler userAuthSuccessHandler;
+    private final UserAuthFailureHandler userAuthFailureHandler;
+    private final UserAuthLogoutSuccessHandler userAuthLogoutSuccessHandler;
+    private final UserAuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Override
     public void configure(WebSecurity webSecurity) {
@@ -57,18 +51,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // X-Frame-Options configuration (not use)
         httpSecurity.headers().frameOptions().disable();
 
-        // UserAuthenticationProvider instead ..
-        httpSecurity.authenticationManager(authenticationManager);
-
         // security Session policy
         // SessionCreationPolicy.ALWAYS : 스프링시큐리티가 항상 세션을 생성
         // SessionCreationPolicy.IF_REQUIRED : 스프링시큐리티가 필요시 생성 (기본)
         // SessionCreationPolicy.NEVER : 스프링시큐리티가 생성하지않지만, 기존에 존재하면 사용
         // SessionCreationPolicy.STATELESS : 스프링시큐리티가 생성하지도않고 기존것을 사용하지도 않음 ( * JWT 에 주로 사용 *)
-        httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
+        httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // 사용자 인증 (ID / PASSWORD) 입력 하기전 JwtAuthenticationFilter 실행
-        httpSecurity.addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+
+        // UserAuthenticationProvider instead ..
+        httpSecurity.authenticationManager(authenticationManager);
 
         // define authorize
         httpSecurity.authorizeRequests()
@@ -90,11 +84,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessHandler(userAuthLogoutSuccessHandler)
-                .deleteCookies("JSESSIONID")            // 쿠키 삭제
+//                .deleteCookies("JSESSIONID")            // 쿠키 삭제
             .and()
             .exceptionHandling()
                 .accessDeniedPage("/404");
-
 
         log.info("security configure register [HttpSecurity] ");
     }

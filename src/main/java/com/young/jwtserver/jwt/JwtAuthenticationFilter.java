@@ -1,6 +1,7 @@
 package com.young.jwtserver.jwt;
 
 import com.young.jwtserver.jwt.enums.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Date : 2022-05-12
@@ -20,7 +22,10 @@ import java.io.IOException;
  * Description :
  */
 @Slf4j
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -31,25 +36,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
 
-                JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-
-                ErrorCode errorCode = jwtTokenProvider.setJwtTokenProvider(jwtToken);
+                HashMap resultMap = jwtTokenProvider.getParseToken(jwtToken);
+                ErrorCode errorCode = (ErrorCode) resultMap.get("errorCode");
 
                 if ( errorCode == ErrorCode.NONE ){
 
-                    //1. jwtToken 에서 사용자 id를 꺼낸다.
-                    String principal = jwtTokenProvider.getUserId();
+                    //1. 사용자 인증 클래스 생성
+                    UserAuthentication authentication = (UserAuthentication) resultMap.get("userAuthentication");
 
-                    //2. jwtToken 에서 사용자 password를 꺼낸다.
-                    String credentials = jwtTokenProvider.getUserPassword();
-
-                    //3. 사용자 인증 클래스 생성
-                    UserAuthentication authentication = new UserAuthentication(principal, credentials);
-
-                    //4. 기본적으로 제공한 details 세팅
+                    //2. 기본적으로 제공한 details 세팅
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    //5. 세션에서 계속 사용하기 위해 securityContext에 Authentication 등록
+                    //3. 세션에서 계속 사용하기 위해 securityContext에 Authentication 등록
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     //6. jwtTokenProvider 정보

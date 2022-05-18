@@ -9,11 +9,9 @@ import com.young.jwtserver.encrypt.YoungEncoder;
 import com.young.jwtserver.jwt.JwtTokenProvider;
 import com.young.jwtserver.jwt.enums.ErrorCode;
 import com.young.jwtserver.model.entity.login.enums.GrantType;
-import com.young.jwtserver.model.entity.login.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -44,11 +42,11 @@ import java.util.Map;
  * Description :
  */
 @Slf4j
+@RequiredArgsConstructor
 @Controller
 public class LoginController extends ExtendsController {
 
-    @Autowired
-    UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(HttpServletRequest request, HttpServletResponse response, Model model) {
@@ -173,7 +171,6 @@ public class LoginController extends ExtendsController {
 
         Map<String, Object> resultMap = Maps.newHashMap();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
         String token = jwtTokenProvider.generateToken(authentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
 

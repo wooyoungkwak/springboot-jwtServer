@@ -1,13 +1,11 @@
 package com.young.jwtserver.jwt;
 
+import com.google.common.collect.Maps;
 import com.young.jwtserver.jwt.enums.ErrorCode;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -20,17 +18,14 @@ import java.util.Map;
  * Description :
  */
 @Slf4j
+@Component
 public class JwtTokenProvider {
 
-    private Claims claims;
-
-    @Autowired
-    UserDetailsService userDetailsService;
-
-    private static final String JWT_SECRET = "secretKey";
+    private static String JWT_SECRET = "secretKey";
 
     // 토큰 유효시간
     private final long JWT_EXPIRATION_MS = 10 * 60 * 1000L;           // 10 분
+
     private final long JWT_REFRESH_EXPIRATION_MS = 60 * 60 * 1000L;   // 1 시간
 
     // jwt 토큰 생성
@@ -85,83 +80,33 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Token 을 이용하여 JwtTokenProvider 설정
-    public ErrorCode setJwtTokenProvider(String token){
-        ErrorCode errorCode = validateToken(token);
-        if ( errorCode == ErrorCode.NONE) {
-            parseToken(token);
-        }
-        return errorCode;
-    }
-
-    private void parseToken(String token) {
-        this.claims = Jwts.parser()
+    private Claims parseToken(String token) {
+        return Jwts.parser()
                 .setSigningKey(JWT_SECRET)
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    public Claims getClaims() {
-        return this.claims;
-    }
-
-    public String getUserId() {
-        return (String) claims.get("id");
-    }
-
-    public String getUserPassword(){
-        return (String) claims.get("password");
-    }
-
-    // 만료 여부
-    public boolean isExpired(){
-        Date now = this.claims.getIssuedAt();
-        Date expiryDate = this.claims.getExpiration();
-
-        long diffTime =  expiryDate.getTime() - expiryDate.getTime();
-
-        if ( diffTime > JWT_EXPIRATION_MS ) {
-            return  true;
-        }
-
-        return false;
-    }
-
-    public boolean isRefreshExpired(){
-        Date now = this.claims.getIssuedAt();
-        Date refreshDate = (Date) this.claims.get("refreshDate");
-
-        long diffTime =  refreshDate.getTime() - refreshDate.getTime();
-
-        if ( diffTime > JWT_REFRESH_EXPIRATION_MS ) {
-            return  true;
-        }
-
-        return false;
-    }
-
     // Jwt 토큰에서 아이디 추출
-    public String getUserIdFromJWT(String token) {
-        ErrorCode errorCode = setJwtTokenProvider(token);
-        if (ErrorCode.NONE == errorCode) {
-            return (String) this.claims.get("id");
-        } else {
-            return null;
-        }
-    }
+    public HashMap<String, Object> getParseToken(String token) {
+        HashMap<String, Object> resultMap = validateToken(token);
+        ErrorCode errorCode = (ErrorCode) resultMap.get("errorCode");
 
-    // Authentication 가져오기
-    public Authentication getAuthentication() {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(getUserId());
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        if ( errorCode == ErrorCode.NONE) {
+            Claims claims = (Claims) resultMap.get("claims");
+             resultMap.put("userAuthentication", new UserAuthentication(claims.get("id"), claims.get("password")));
+        }
+
+        return resultMap;
     }
 
     // Jwt 토큰 유효성 검사
-    public ErrorCode validateToken(String token) {
+    private HashMap<String, Object> validateToken(String token) {
+        Claims claims = null;
         ErrorCode errorCode;
         try {
-            Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
-            return ErrorCode.NONE;
+            claims = parseToken(token);
+            errorCode = ErrorCode.NONE;
         } catch (SignatureException ex) {
             log.error("Invalid JWT signature ({})", ex.getMessage());
             errorCode = ErrorCode.InvalidException;
@@ -178,7 +123,11 @@ public class JwtTokenProvider {
             log.error("JWT claims string is empty. ({})", ex.getMessage());
             errorCode = ErrorCode.InvalidException;
         }
-        return errorCode;
+        HashMap<String, Object> resultMap = Maps.newHashMap();
+        resultMap.put("claims", claims);
+        resultMap.put("errorCode", errorCode);
+
+        return resultMap;
     }
 
 }
