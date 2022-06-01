@@ -1,0 +1,12 @@
+// war 배포시 내장용 tomcat 사용 여부 설정
+// 1. java 에서 바로 실행 ( $> java -jar ROOT.war ) 설정
+bootWar {
+    enabled=false
+}
+
+// 2. 파일 이름 설정
+// 3. war 파일 생성
+war {
+    archiveName 'ROOT.war'
+    enabled=true
+}

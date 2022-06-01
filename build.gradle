@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.7'
+    id 'org.springframework.boot' version '2.7.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'war'
@@ -13,9 +13,6 @@ repositories {
     mavenCentral()
 }
 
-apply from: 'initProject.gradle'
-apply from: 'jwtProject.gradle'
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
@@ -25,3 +22,5 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+apply from: 'initProject.gradle'

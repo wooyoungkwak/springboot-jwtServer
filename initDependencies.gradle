@@ -1,0 +1,69 @@
+configurations {
+    all {
+        // springboot 자체 logging 프로임워크 제외
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+ext['spring-security.version']='5.6.2'
+
+dependencies {
+
+    // security
+    implementation "org.springframework.boot:spring-boot-starter-security"
+
+    // jsp ( add jstl and stripes )
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'javax.servlet:jstl'
+    implementation 'net.sourceforge.stripes:stripes:1.5.8'
+
+    // jackson
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // queryDSL
+    implementation 'com.querydsl:querydsl-jpa'
+
+    // mybatis
+//    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0'
+
+    // java jdbc driver (mssql)
+    runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+
+    // Excel
+    implementation 'org.apache.poi:poi:5.2.2'
+    implementation 'org.apache.poi:poi-ooxml:5.2.2'
+
+    // jxls for Excel Control
+    implementation 'org.jxls:jxls-poi:2.11.0'
+    implementation 'org.jxls:jxls-jexcel:1.0.9'
+    implementation 'org.jxls:jxls:2.11.0'
+
+    // log4js (logging 프레임워크)
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+    // development tools
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // guava
+    implementation group: 'com.google.guava', name: 'guava', version: '11.0.2'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+
+    // commons-lang3  ( StringUtils 등 )
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+
+    /* annotationProcessor */
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'javax.persistence:javax.persistence-api' // java.lang.NoClassDefFoundError(javax.annotation.Entity) 발생 대응
+    annotationProcessor 'javax.annotation:javax.annotation-api'  // java.lang.NoClassDefFoundError(javax.annotation.Generated) 발생 대응
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa" // Querydsl JPAAnnotationProcessor 사용 지정
+
+}
