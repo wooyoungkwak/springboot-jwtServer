@@ -3,8 +3,10 @@
 2. 배포시 내장 tomcat 은 사용하지 않도록 설정
 
 ## 의존성 Gradle  (initProject.gradle 참조)
-1. initDependencies.gradle
-2. initFile.gradle 
+1. initConfiguration.gradle
+2. initDependencies.gradle
+3. initDependencies-Jwt.gradle
+4. initFile.gradle 
 
 ## 주의 사항
 [ JPA - Hibernate ]
