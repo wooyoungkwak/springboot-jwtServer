@@ -1,0 +1,40 @@
+apply plugin: 'maven-publish'
+
+ext.nexus = [
+        release : 'http://localhost:8081/repository/my-repo-release/',
+        snapshot : 'http://localhost:8081/repository/my-repo-snapshot/'
+]
+
+repositories {
+    maven {
+        url nexus.snapshot
+//        isAllowInsecureProtocol true ( deprecated .. isAllowInsecureProtocol)
+        setAllowInsecureProtocol true
+    }
+}
+
+publishing {
+
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.young'
+            artifactId = 'portfolio'
+            version = "1.0.0-SNAPSHOT"
+
+            from components.web
+        }
+    }
+
+    repositories {
+        maven {
+            credentials {
+                username = nexusUsername
+                password = nexusPassword
+            }
+
+            url = nexus.snapshot
+//            isAllowInsecureProtocol true
+            setAllowInsecureProtocol true
+        }
+    }
+}

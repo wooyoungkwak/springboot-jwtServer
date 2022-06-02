@@ -1,7 +1,8 @@
-// make Web Directory Template
-task initFile (dependsOn: ['createYML', 'createLog4j'], description: "initialize Web Project") {
+// web 및 java source 디렉토리 생성
+task initFile(dependsOn: ['createYML', 'createLog4j'], description: "initialize Web Project") {
 
     doLast {
+
         // web 디렉토리 생성
         String webInf = "/WEB-INF"
         String tags = webInf + "/tags"
@@ -20,7 +21,7 @@ task initFile (dependsOn: ['createYML', 'createLog4j'], description: "initialize
         String assets = resources + "/assets"
 
         [
-                webAppDir, new File(webAppDir, webinf), new File(webAppDir, views), new File(webAppDir, tags),
+                webAppDir, new File(webAppDir, webInf), new File(webAppDir, views), new File(webAppDir, tags),
                 new File(webAppDir, controller), new File(webAppDir, layout), new File(webAppDir, reference),
                 new File(webAppDir, home), new File(webAppDir, error),
                 new File(webAppDir, resources), new File(webAppDir, js), new File(webAppDir, css), new File(webAppDir, assets)
@@ -47,7 +48,7 @@ task initFile (dependsOn: ['createYML', 'createLog4j'], description: "initialize
     }
 }
 
-// create log4j.xml file
+// log4j.xml 파일 생성
 task createLog4j {
     doLast {
         String content = '<?xml version="1.0" encoding="UTF-8"?>\n' +
@@ -123,7 +124,7 @@ task createLog4j {
 
         sourceSets.main.java.srcDirs.each {
             String absoluteDir = it.getPath()
-            [new File(absoluteDir, '../resources/log4j2.xml' )].each {
+            [new File(absoluteDir, '../resources/log4j2.xml')].each {
                 if (!it.exists()) {
                     it.createNewFile()
                     File configFile = file(it)
@@ -134,7 +135,7 @@ task createLog4j {
     }
 }
 
-// create application.yml file
+// application.yml 파일 생성
 task createYML {
     doLast {
         String content = "spring:\n" +
@@ -144,88 +145,113 @@ task createYML {
                 "      suffix: .jsp\n" +
                 "  devtools:\n" +
                 "    livereload:\n" +
-                "      enabled: true\n" +
-                "  jpa:\n" +
-                "    show-sql: true\n" +
-                "    hibernate:\n" +
-                "      ddl-auto: none\n" +
-                "      naming:\n" +
-                "        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl\n" +
-                "      use-new-id-generator-mappings: false\n" +
-                "  security:\n" +
-                "    user:\n" +
-                "      name: admin\n" +
-                "      password: qwer1234\n" +
-                "      roles: ADMIN\n" +
+                "      enabled: true\n"
+        if (dependenceOnRDBMS != null && dependenceOnRDBMS) {
+            content +=
+                    "  jpa:\n" +
+                            "    show-sql: true\n" +
+                            "    hibernate:\n" +
+                            "      ddl-auto: none\n" +
+                            "      naming:\n" +
+                            "        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl\n" +
+                            "      use-new-id-generator-mappings: false\n"
+        }
+        if (dependenceOnSecurity != null && dependenceOnSecurity) {
+            content +=
+                    "  security:\n" +
+                            "    user:\n" +
+                            "      name: admin\n" +
+                            "      password: qwer1234\n" +
+                            "      roles: ADMIN\n"
+        }
+        content +=
                 "logging:\n" +
-                "  config: classpath:log4j2.xml\n" +
-                "debug: false\n" +
-                "#server:\n" +
-                "#  error:\n" +
-                "#    path: \"/404\"\n" +
-                "---\n" +
-                "# debug\n" +
-                "spring:\n" +
-                "  config:\n" +
-                "    activate:\n" +
-                "      on-profile: debug\n" +
-                "  jpa:\n" +
-                "    database-platform: org.hibernate.dialect.SQLServer2012Dialect\n" +
-                "  datasource:\n" +
-                "    url: jdbc:sqlserver://localhost;databaseName=sarangbang;trustServerCertificate=true;encrypt=true;\n" +
-                "    username: sa\n" +
-                "    password: rudnf12dnjf\n" +
+                        "  config: classpath:log4j2.xml\n" +
+                        "debug: false\n" +
+                        "---\n" +
+                        "# debug\n" +
+                        "spring:\n" +
+                        "  config:\n" +
+                        "    activate:\n" +
+                        "      on-profile: debug\n"
+        if (dependenceOnRDBMS != null && dependenceOnRDBMS) {
+            switch (typeOfRDMBS) {
+                case RDMBS.MSSQL:
+                    content +=
+                            "  jpa:\n" +
+                                    "    database-platform: org.hibernate.dialect.SQLServer2012Dialect\n" +
+                                    "  datasource:\n" +
+                                    "    url: jdbc:sqlserver://localhost;databaseName=_____;trustServerCertificate=true;encrypt=true;\n" +
+                                    "    username: \n" +
+                                    "    password: \n"
+                    break
+                case RDMBS.MYSQL:
+                    content +=
+                            "  jpa:\n" +
+                                    "    database-platform: ??\n" +
+                                    "  datasource:\n" +
+                                    "    url: \n" +
+                                    "    username: \n" +
+                                    "    password: \n"
+                    break
+                case RDMBS.ORACLE:
+                    break
+            }
+        }
+        content +=
                 "server:\n" +
-                "  port: 8080\n" +
-                "  servlet:\n" +
-                "    context-path: /\n" +
-                "    session:\n" +
-                "      timeout: 300m\n" +
-                "---\n" +
-                "# mysql (mariadb)\n" +
-                "spring:\n" +
-                "  config:\n" +
-                "    activate:\n" +
-                "      on-profile: mysql\n" +
-                "  jpa:\n" +
-                "    database-platform: ??\n" +
-                "  datasource:\n" +
-                "    url: ??\n" +
-                "    username: sa\n" +
-                "    password: rudnf12dnjf\n" +
+                        "  port: 8080\n" +
+                        "  servlet:\n" +
+                        "    context-path: /\n" +
+                        "    session:\n" +
+                        "      timeout: 300m\n" +
+                        "---\n" +
+                        "# release\n" +
+                        "spring:\n" +
+                        "  config:\n" +
+                        "    activate:\n" +
+                        "      on-profile: release\n"
+        if (dependenceOnRDBMS != null && dependenceOnRDBMS) {
+            switch (typeOfRDMBS) {
+                case RDMBS.MSSQL:
+                    content +=
+                            "  jpa:\n" +
+                                    "    database-platform: org.hibernate.dialect.SQLServer2012Dialect\n" +
+                                    "  datasource:\n" +
+                                    "    url: jdbc:sqlserver://localhost;databaseName=_____;trustServerCertificate=true;encrypt=true;\n" +
+                                    "    username: \n" +
+                                    "    password: \n"
+                    break
+                case RDMBS.MYSQL:
+                    content +=
+                            "  jpa:\n" +
+                                    "    database-platform: ??\n" +
+                                    "  datasource:\n" +
+                                    "    url: \n" +
+                                    "    username: \n" +
+                                    "    password: \n"
+                    break
+                case RDMBS.ORACLE:
+                    break
+            }
+        }
+        content +=
                 "server:\n" +
-                "  port: 80\n" +
-                "  servlet:\n" +
-                "    context-path: /\n" +
-                "    session:\n" +
-                "      timeout: 30m\n" +
-                "---\n" +
-                "# mssql\n" +
-                "spring:\n" +
-                "  config:\n" +
-                "    activate:\n" +
-                "      on-profile: mssql\n" +
-                "  jpa:\n" +
-                "    database-platform: org.hibernate.dialect.SQLServer2012Dialect\n" +
-                "  datasource:\n" +
-                "    url: jdbc:sqlserver://localhost;databaseName=sarangbang;trustServerCertificate=true;encrypt=true;\n" +
-                "    username: sa\n" +
-                "    password: rudnf12dnjf\n" +
-                "server:\n" +
-                "  port: 80\n" +
-                "  servlet:\n" +
-                "    context-path: /\n" +
-                "    session:\n" +
-                "      timeout: 30m";
+                        "  port: 80\n" +
+                        "  servlet:\n" +
+                        "    context-path: /\n" +
+                        "    session:\n" +
+                        "      timeout: 30m"
 
         sourceSets.main.java.srcDirs.each {
             String absoluteDir = it.getPath()
-            [new File(absoluteDir, '../resources/application.yml' )].each {
+            [new File(absoluteDir, '../resources/application.yml')].each {
                 if (!it.exists()) {
                     it.createNewFile()
                     File configFile = file(it)
                     configFile.write content
                 }
+
             }
 
             [new File(absoluteDir, '../resources/application.properties' )].each {
@@ -234,7 +260,6 @@ task createYML {
                 }
             }
         }
-
     }
 
 }

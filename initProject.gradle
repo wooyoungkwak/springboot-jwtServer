@@ -1,8 +1,23 @@
-apply from: 'initConfiguration.gradle'
-apply from: 'initDependencies.gradle'
-apply from: 'initDependencies-Jwt.gradle'
-apply from: 'initFile.gradle'
+/* extends */
+ext.dependenceOnSecurity = true                   // whether to use spring-boot-security
+ext.dependenceOnJwt = true                        // whether to use jwt
+ext.dependenceOnRDBMS = true                      // whether to use RDBMS
+ext.dependenceOnQUERYDSL = true                   // whether to use query DSL
+ext.dependenceOnMYBATIS = false                    // whether to use mybatis
+ext.uploadArchive = false                          // whether to upload archive
 
-task downloadGradle() {
-    print " ********** download gradle file *************"
-}
+ext.RDMBS = [
+        MYSQL : "MYSQL",
+        MSSQL : "MSSQL",
+        ORACLE: "ORACLE"
+]
+
+ext.typeOfRDMBS = RDMBS.MSSQL                       // select to RDBMS
+
+/* apply */
+apply from: 'initConfiguration.gradle'              // configuration for built environment
+apply from: 'initDependencies.gradle'              // configuration for built environment
+apply from: 'initFile.gradle'                       // create to web file
+
+if (uploadArchive !=null && uploadArchive)
+    apply from: 'uploadArchive.gradle'                  // upload to archive repository
