@@ -21,9 +21,6 @@ spring:
 logging:
   config: classpath:log4j2.xml
 debug: false
-#server:
-#  error:
-#    path: "/404"
 ---
 # debug
 spring:
@@ -43,29 +40,11 @@ server:
     session:
       timeout: 300m
 ---
-# mysql (mariadb)
+# release
 spring:
   config:
     activate:
-      on-profile: mysql
-  jpa:
-    database-platform: ??
-  datasource:
-    url: ??
-    username: sa
-    password: rudnf12dnjf
-server:
-  port: 80
-  servlet:
-    context-path: /
-    session:
-      timeout: 30m
----
-# mssql
-spring:
-  config:
-    activate:
-      on-profile: mssql
+      on-profile: release
   jpa:
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
   datasource:
