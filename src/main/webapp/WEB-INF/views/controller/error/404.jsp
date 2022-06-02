@@ -20,9 +20,11 @@
                         <img class="mb-4 img-error"
                              src="<%=contextPath%>/resources/assets/img/error-404-monochrome.svg"/>
                         <p class="lead">This requested URL was not found on this server.</p>
-                        <a href="home">
+                        <p class="lead"> because by  </p>
+                        <p class="lead"> ${msg} </p>
+                        <a href="!#">
                             <i class="fas fa-arrow-left me-1"></i>
-                            Return to Dashboard
+                            Back to the ....
                         </a>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.young.jwtserver.controller.ExtendsController;
 import com.young.jwtserver.encrypt.YoungEncoder;
+import com.young.jwtserver.exception.EncryptedException;
 import com.young.jwtserver.jwt.JwtTokenProvider;
 import com.young.jwtserver.jwt.enums.ErrorCode;
 import com.young.jwtserver.model.entity.login.enums.GrantType;
@@ -49,7 +50,7 @@ public class LoginController extends ExtendsController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String login(HttpServletRequest request, HttpServletResponse response, Model model) {
+    public String login(HttpServletRequest request, HttpServletResponse response, Model model) throws EncryptedException {
         String code = (String) request.getAttribute("code");
         model.addAttribute("code", YoungEncoder.urlEncode(code));
         return getPath("/login");
@@ -184,6 +185,12 @@ public class LoginController extends ExtendsController {
         JsonNode jsonNode = objectMapper.readTree(jsonStr);
 
         return jsonNode;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public String exception(Model model) {
+        model.addAttribute("msg", "Unknown error. ");
+        return "/controller/error/404";
     }
 
     // parameter 정보 가져오기
