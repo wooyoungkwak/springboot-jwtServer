@@ -1,10 +1,13 @@
 /* extends */
 ext.dependenceOnSecurity = true                   // whether to use spring-boot-security
+ext.dependenceOnAop = false                        // whether to use spring-boot-aop
 ext.dependenceOnJwt = true                        // whether to use jwt
 ext.dependenceOnRDBMS = true                      // whether to use RDBMS
 ext.dependenceOnQUERYDSL = true                   // whether to use query DSL
 ext.dependenceOnMYBATIS = false                    // whether to use mybatis
 ext.uploadArchive = false                          // whether to upload archive
+ext.dependenceOnBatch = false                        // whether to use Batch
+ext.dependenceOnQuartz = false                       // whether to use Quartz ( scheduler )
 
 ext.RDMBS = [
         MYSQL : "MYSQL",

@@ -51,10 +51,26 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // batch
+    if (dependenceOnBatch != null && dependenceOnBatch) {
+        implementation 'org.springframework.boot:spring-boot-starter-batch'
+    }
+
+    // quartz
+    if (dependenceOnQuartz != null && dependenceOnQuartz) {
+        implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    }
+
     // security
     if (dependenceOnSecurity != null && dependenceOnSecurity) {
         logger.quiet 'apply as spring-boot-starter-security ... '
         implementation "org.springframework.boot:spring-boot-starter-security"
+    }
+
+    // aop
+    if (dependenceOnAop != null && dependenceOnAop) {
+        logger.quiet 'apply as spring-boot-starter-aop ... '
+        implementation "org.springframework.boot:spring-boot-starter-aop"
     }
 
     // jwt
@@ -64,6 +80,7 @@ dependencies {
         implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
     }
 
+    // RDBMS
     if (dependenceOnRDBMS != null && dependenceOnRDBMS) {
         logger.quiet 'apply as spring-boot-starter-data-jpa ... '
 
